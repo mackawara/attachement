@@ -27,6 +27,7 @@ async function hasUserRecord(
 
 export const authConfig: NextAuthConfig = {
   providers: [GitHub, Google],
+  trustHost: true,
   pages: {
     signIn: "/signin",
   },
