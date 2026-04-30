@@ -37,7 +37,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/");
-  }, [status, router]);
+    if (status === "authenticated") {
+      const role = session?.user?.role;
+      if (!role) router.push("/role-select");
+      else if (role === "supervisor") router.push("/supervisor");
+    }
+  }, [status, session, router]);
 
   useEffect(() => {
     if (status !== "authenticated") return;

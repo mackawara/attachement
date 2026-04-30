@@ -46,6 +46,8 @@ interface WeekData {
   days: Record<(typeof DAYS)[number], DayEntry>;
   weeklyReport: string;
   signatureDate: string;
+  supervisorComment?: string;
+  supervisorCommentAt?: string | null;
 }
 
 export default function ViewWeek() {
@@ -283,6 +285,37 @@ export default function ViewWeek() {
           </TableContainer>
         )}
       </Paper>
+
+      {week.supervisorComment ? (
+        <Paper
+          sx={{
+            p: 3,
+            mb: 3,
+            borderLeft: 4,
+            borderColor: "success.main",
+            bgcolor: "success.light",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 1,
+            }}
+          >
+            <Typography variant="h6">Supervisor Comment</Typography>
+            {week.supervisorCommentAt && (
+              <Typography variant="caption" color="text.secondary">
+                {new Date(week.supervisorCommentAt).toLocaleString()}
+              </Typography>
+            )}
+          </Box>
+          <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+            {week.supervisorComment}
+          </Typography>
+        </Paper>
+      ) : null}
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>

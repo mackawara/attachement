@@ -291,21 +291,27 @@ export async function GET() {
       new Paragraph({
         children: [
           new TextRun({
-            text: "Comments by Lecturer/Supervisor: ………………………………………………………",
+            text: "Comments by Lecturer/Supervisor:",
+            bold: true,
             size: 22,
           }),
         ],
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: "………………………………………………………………………………………………………", size: 22 }),
+          new TextRun({
+            text:
+              week.supervisorComment ||
+              "………………………………………………………………………………………………………",
+            size: 22,
+          }),
         ],
       }),
       new Paragraph({ text: "" }),
       new Paragraph({
         children: [
           new TextRun({
-            text: "Name: ……………………………………………………………………………",
+            text: `Name: ${student.supervisorName || "……………………………………………………………………"}`,
             size: 22,
           }),
         ],
@@ -313,7 +319,11 @@ export async function GET() {
       new Paragraph({
         children: [
           new TextRun({
-            text: "Signature: ………………………………………     Date: ………………",
+            text: `Signature: ………………………………………     Date: ${
+              week.supervisorCommentAt
+                ? new Date(week.supervisorCommentAt).toLocaleDateString()
+                : "………………"
+            }`,
             size: 22,
           }),
         ],

@@ -4,6 +4,7 @@ export interface IStudent extends Document {
   githubId: string;
   email: string;
   name: string;
+  gender: "male" | "female";
   pin: string;
   faculty: string;
   program: string;
@@ -15,6 +16,7 @@ export interface IStudent extends Document {
   supervisorDesignation: string;
   supervisorTelephone: string;
   supervisorMobile: string;
+  supervisorEmail: string;
   attachmentFrom: string;
   attachmentTo: string;
   createdAt: Date;
@@ -26,6 +28,7 @@ const StudentSchema = new Schema<IStudent>(
     githubId: { type: String, required: true, unique: true },
     email: { type: String, required: true },
     name: { type: String, required: true },
+    gender: { type: String, enum: ["male", "female"], required: true },
     pin: { type: String, required: true },
     faculty: { type: String, default: "Faculty of Technology" },
     program: { type: String, default: "" },
@@ -37,6 +40,7 @@ const StudentSchema = new Schema<IStudent>(
     supervisorDesignation: { type: String, default: "" },
     supervisorTelephone: { type: String, default: "" },
     supervisorMobile: { type: String, default: "" },
+    supervisorEmail: { type: String, default: "", lowercase: true, trim: true, index: true },
     attachmentFrom: { type: String, default: "" },
     attachmentTo: { type: String, default: "" },
   },

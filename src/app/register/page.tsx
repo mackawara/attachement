@@ -14,12 +14,14 @@ import {
   Alert,
   CircularProgress,
   Divider,
+  MenuItem,
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import SchoolIcon from "@mui/icons-material/School";
 
 interface FormData {
   name: string;
+  gender: "male" | "female" | "";
   pin: string;
   faculty: string;
   program: string;
@@ -31,6 +33,7 @@ interface FormData {
   supervisorDesignation: string;
   supervisorTelephone: string;
   supervisorMobile: string;
+  supervisorEmail: string;
   attachmentFrom: string;
   attachmentTo: string;
 }
@@ -42,6 +45,7 @@ export default function Register() {
   const [error, setError] = useState("");
   const [form, setForm] = useState<FormData>({
     name: "",
+    gender: "",
     pin: "",
     faculty: "Faculty of Technology",
     program: "",
@@ -53,6 +57,7 @@ export default function Register() {
     supervisorDesignation: "",
     supervisorTelephone: "",
     supervisorMobile: "",
+    supervisorEmail: "",
     attachmentFrom: "",
     attachmentTo: "",
   });
@@ -70,6 +75,7 @@ export default function Register() {
           const s = data.student;
           setForm({
             name: s.name || "",
+            gender: s.gender || "",
             pin: s.pin || "",
             faculty: s.faculty || "Faculty of Technology",
             program: s.program || "",
@@ -81,6 +87,7 @@ export default function Register() {
             supervisorDesignation: s.supervisorDesignation || "",
             supervisorTelephone: s.supervisorTelephone || "",
             supervisorMobile: s.supervisorMobile || "",
+            supervisorEmail: s.supervisorEmail || "",
             attachmentFrom: s.attachmentFrom || "",
             attachmentTo: s.attachmentTo || "",
           });
@@ -94,8 +101,8 @@ export default function Register() {
   };
 
   const handleSubmit = async () => {
-    if (!form.name || !form.pin) {
-      setError("Name and PIN are required.");
+    if (!form.name || !form.pin || !form.gender) {
+      setError("Name, PIN, and Gender are required.");
       return;
     }
     setSaving(true);
@@ -160,6 +167,19 @@ export default function Register() {
               value={form.name}
               onChange={(e) => update("name", e.target.value)}
             />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label="Gender"
+              fullWidth
+              required
+              select
+              value={form.gender}
+              onChange={(e) => update("gender", e.target.value)}
+            >
+              <MenuItem value="male">Male</MenuItem>
+              <MenuItem value="female">Female</MenuItem>
+            </TextField>
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
@@ -286,6 +306,16 @@ export default function Register() {
               fullWidth
               value={form.supervisorMobile}
               onChange={(e) => update("supervisorMobile", e.target.value)}
+            />
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <TextField
+              label="Supervisor GitHub Email"
+              type="email"
+              fullWidth
+              helperText="Email on your supervisor's GitHub account — used so they can sign in and review your weeks."
+              value={form.supervisorEmail}
+              onChange={(e) => update("supervisorEmail", e.target.value)}
             />
           </Grid>
         </Grid>

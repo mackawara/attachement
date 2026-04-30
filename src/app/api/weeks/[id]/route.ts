@@ -20,7 +20,14 @@ export async function PUT(
   await connectDB();
   const { id } = await params;
   const body = await req.json();
-  const week = await Week.findByIdAndUpdate(id, body, { new: true });
+  const {
+    supervisorComment: _sc,
+    supervisorCommentAt: _scAt,
+    ...studentEditable
+  } = body ?? {};
+  void _sc;
+  void _scAt;
+  const week = await Week.findByIdAndUpdate(id, studentEditable, { new: true });
   if (!week) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(week);
 }

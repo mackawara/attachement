@@ -18,6 +18,8 @@ export interface IWeek extends Document {
   };
   weeklyReport: string;
   signatureDate: string;
+  supervisorComment: string;
+  supervisorCommentAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,6 +46,8 @@ const WeekSchema = new Schema<IWeek>(
     },
     weeklyReport: { type: String, default: "" },
     signatureDate: { type: String, default: "" },
+    supervisorComment: { type: String, default: "" },
+    supervisorCommentAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

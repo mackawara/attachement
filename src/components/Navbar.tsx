@@ -6,7 +6,6 @@ import {
   Typography,
   Button,
   Box,
-  IconButton,
 } from "@mui/material";
 import { useSession, signIn, signOut } from "next-auth/react";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -33,9 +32,13 @@ export default function Navbar() {
           {session ? (
             <>
               <Typography variant="body2">{session.user?.name}</Typography>
-              <IconButton color="inherit" onClick={() => signOut()}>
-                <LogoutIcon />
-              </IconButton>
+              <Button
+                color="inherit"
+                startIcon={<LogoutIcon />}
+                onClick={() => signOut({ callbackUrl: "/" })}
+              >
+                Logout
+              </Button>
             </>
           ) : (
             <Button
