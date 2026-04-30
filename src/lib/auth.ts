@@ -1,48 +1,39 @@
-import { AuthOptions } from "next-auth";
-import GitHubProvider from "next-auth/providers/github";
+import NextAuth, { type NextAuthConfig } from "next-auth";
+import GitHub from "next-auth/providers/github";
+import { isGitHubUserAllowed } from "@/lib/allowedEmails";
 
-function getAllowedEmails(): string[] {
-  const raw = process.env.ALLOWED_EMAILS || "";
-  return raw
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-export const authOptions: AuthOptions = {
-  providers: [
-    GitHubProvider({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET!,
-    }),
-  ],
+export const authConfig: NextAuthConfig = {
+  providers: [GitHub],
+  pages: {
+    signIn: "/signin",
+  },
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
-    async signIn({ user }) {
-      const allowed = getAllowedEmails();
-      if (allowed.length === 0) return true;
-      const email = user.email?.toLowerCase() || "";
-      if (!allowed.includes(email)) {
-        return false;
-      }
-      return true;
+    signIn({ user, profile }) {
+      const username = (profile as { login?: string })?.login ?? "";
+      console.log(username,user.email)
+      return isGitHubUserAllowed(username, user.email ?? null);
     },
-    async jwt({ token, account, profile }) {
+    authorized({ auth }) {
+      return !!auth?.user;
+    },
+    jwt({ token, account, profile }) {
       if (account && profile) {
         token.githubId =
-          (profile as { id?: number }).id?.toString() ||
+          (profile as { id?: number }).id?.toString() ??
           account.providerAccountId;
       }
       return token;
     },
-    async session({ session, token }) {
-      if (session.user) {
-        (session.user as { githubId?: string }).githubId =
-          token.githubId as string;
+    session({ session, token }) {
+      if (session.user && typeof token.githubId === "string") {
+        session.user.githubId = token.githubId;
       }
       return session;
     },
   },
-  pages: {
-    signIn: "/",
-  },
 };
+
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);

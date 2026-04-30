@@ -1,8 +1,8 @@
 "use client";
 
-import { useSession, signIn } from "next-auth/react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { useSession, signIn } from "next-auth/react";
 import {
   Container,
   Box,
@@ -16,19 +16,17 @@ import {
 import GitHubIcon from "@mui/icons-material/GitHub";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 
-function HomeContent() {
+function SignInContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [snackOpen, setSnackOpen] = useState(
-    () => searchParams.get("error") === "AccessDenied",
-  );
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const error = searchParams.get("error");
+  const [snackOpen, setSnackOpen] = useState(() => !!error);
 
   useEffect(() => {
-    if (session) {
-      router.push("/dashboard");
-    }
-  }, [session, router]);
+    if (session) router.push(callbackUrl);
+  }, [session, router, callbackUrl]);
 
   if (status === "loading") return null;
 
@@ -45,20 +43,19 @@ function HomeContent() {
         <Paper elevation={3} sx={{ p: 5, textAlign: "center", width: "100%" }}>
           <MenuBookIcon sx={{ fontSize: 64, color: "primary.main", mb: 2 }} />
           <Typography variant="h4" gutterBottom>
-            ZOU Attachment Logbook
+            Sign in
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Digital logbook for tracking your weekly attachment progress.
-            AI-powered to expand your brief notes into comprehensive reports.
+            Use your approved GitHub account to access the attachment logbook.
           </Typography>
           <Stack spacing={2}>
             <Button
               variant="contained"
               size="large"
               startIcon={<GitHubIcon />}
-              onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+              onClick={() => signIn("github", { callbackUrl })}
             >
-              Sign in with GitHub
+              Continue with GitHub
             </Button>
           </Stack>
         </Paper>
@@ -75,18 +72,19 @@ function HomeContent() {
           variant="filled"
           sx={{ width: "100%" }}
         >
-          Access denied — your email is not on the approved list. Contact your
-          administrator.
+          {error === "AccessDenied"
+            ? "Access denied — your email is not on the approved list. Contact your administrator."
+            : "Sign-in failed. Please try again."}
         </Alert>
       </Snackbar>
     </Container>
   );
 }
 
-export default function Home() {
+export default function SignInPage() {
   return (
     <Suspense>
-      <HomeContent />
+      <SignInContent />
     </Suspense>
   );
 }
