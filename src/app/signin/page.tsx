@@ -20,7 +20,7 @@ function SignInContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") || "/logger/dashboard";
   const error = searchParams.get("error");
   const [snackOpen, setSnackOpen] = useState(() => !!error);
 
