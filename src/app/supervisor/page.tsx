@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { apiFetch } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -55,7 +56,7 @@ export default function SupervisorHome() {
     if (status !== "authenticated" || session?.user?.role !== "supervisor")
       return;
 
-    fetch("/api/supervisor/students")
+    apiFetch("/api/supervisor/students")
       .then(async (r) => {
         if (!r.ok) throw new Error(await r.text());
         return r.json();

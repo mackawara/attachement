@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { apiFetch } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -47,14 +48,14 @@ export default function Dashboard() {
   useEffect(() => {
     if (status !== "authenticated") return;
 
-    fetch("/api/student")
+    apiFetch("/api/student")
       .then((r) => r.json())
       .then((data) => {
         if (!data.registered) {
           router.push("/register");
           return;
         }
-        return fetch("/api/weeks");
+        return apiFetch("/api/weeks");
       })
       .then((r) => r?.json())
       .then((data) => {
@@ -65,12 +66,12 @@ export default function Dashboard() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this week?")) return;
-    await fetch(`/api/weeks/${id}`, { method: "DELETE" });
+    await apiFetch(`/api/weeks/${id}`, { method: "DELETE" });
     setWeeks((prev) => prev.filter((w) => w._id !== id));
   };
 
   const handleDownload = async () => {
-    const res = await fetch("/api/docx");
+    const res = await apiFetch("/api/docx");
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

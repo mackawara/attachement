@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { apiFetch } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
@@ -68,7 +69,7 @@ export default function ViewWeek() {
 
   useEffect(() => {
     if (params.id) {
-      fetch(`/api/weeks/${params.id}`)
+      apiFetch(`/api/weeks/${params.id}`)
         .then((r) => r.json())
         .then((data) => {
           setWeek(data);
@@ -93,7 +94,7 @@ export default function ViewWeek() {
     setExpanding(true);
     setError("");
     try {
-      const res = await fetch("/api/expand", {
+      const res = await apiFetch("/api/expand", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ days: week.days }),
@@ -117,7 +118,7 @@ export default function ViewWeek() {
     setSaving(true);
     setError("");
     try {
-      const res = await fetch(`/api/weeks/${week._id}`, {
+      const res = await apiFetch(`/api/weeks/${week._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(week),

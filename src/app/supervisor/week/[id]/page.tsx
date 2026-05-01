@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { apiFetch } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
@@ -80,7 +81,7 @@ export default function SupervisorReviewWeek() {
 
   useEffect(() => {
     if (!params.id) return;
-    fetch(`/api/supervisor/weeks/${params.id}`)
+    apiFetch(`/api/supervisor/weeks/${params.id}`)
       .then(async (r) => {
         if (!r.ok) throw new Error(await r.text());
         return r.json();
@@ -102,7 +103,7 @@ export default function SupervisorReviewWeek() {
     setSaving(true);
     setError("");
     try {
-      const res = await fetch(`/api/supervisor/weeks/${week._id}`, {
+      const res = await apiFetch(`/api/supervisor/weeks/${week._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ supervisorComment: comment }),
@@ -128,7 +129,7 @@ export default function SupervisorReviewWeek() {
     setAiBusy(mode);
     setError("");
     try {
-      const res = await fetch("/api/comment-suggest", {
+      const res = await apiFetch("/api/comment-suggest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

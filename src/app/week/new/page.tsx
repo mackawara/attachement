@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { apiFetch } from "@/lib/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -64,7 +65,7 @@ export default function NewWeek() {
     setExpanding(true);
     setError("");
     try {
-      const res = await fetch("/api/expand", {
+      const res = await apiFetch("/api/expand", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ days }),
@@ -93,7 +94,7 @@ export default function NewWeek() {
     setSaving(true);
     setError("");
     try {
-      const res = await fetch("/api/weeks", {
+      const res = await apiFetch("/api/weeks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

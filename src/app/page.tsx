@@ -58,7 +58,7 @@ function HomeContent() {
               variant="contained"
               size="large"
               startIcon={<GitHubIcon />}
-              onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+              onClick={() => signIn("github", { callbackUrl: "/logger/dashboard" })}
             >
               Sign in with GitHub
             </Button>
@@ -73,7 +73,7 @@ function HomeContent() {
                   <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.9 2.4 30.4 0 24 0 14.7 0 6.5 5.2 2.6 13.1l8.1 6.2C12.6 13.7 17.8 9.5 24 9.5z"/>
                 </svg>
               }
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              onClick={() => signIn("google", { callbackUrl: "/logger/dashboard" })}
             >
               Sign in with Google
             </Button>

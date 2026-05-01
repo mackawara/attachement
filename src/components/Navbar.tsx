@@ -35,7 +35,7 @@ export default function Navbar() {
               <Button
                 color="inherit"
                 startIcon={<LogoutIcon />}
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={() => signOut({ callbackUrl: "/logger" })}
               >
                 Logout
               </Button>

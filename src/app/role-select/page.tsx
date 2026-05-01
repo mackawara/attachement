@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { apiFetch } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -39,7 +40,7 @@ export default function RoleSelect() {
     setSubmitting(role);
     setError("");
     try {
-      const res = await fetch("/api/role", {
+      const res = await apiFetch("/api/role", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role }),

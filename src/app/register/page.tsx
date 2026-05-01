@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { apiFetch } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -67,7 +68,7 @@ export default function Register() {
 
   useEffect(() => {
     if (status !== "authenticated") return;
-    fetch("/api/student")
+    apiFetch("/api/student")
       .then((r) => r.json())
       .then((data) => {
         if (data.registered && data.student) {
@@ -108,7 +109,7 @@ export default function Register() {
     setSaving(true);
     setError("");
     try {
-      const res = await fetch("/api/student", {
+      const res = await apiFetch("/api/student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

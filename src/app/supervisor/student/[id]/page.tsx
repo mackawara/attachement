@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { apiFetch } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
@@ -82,7 +83,7 @@ export default function SupervisorStudentDetail() {
 
   useEffect(() => {
     if (!params.id) return;
-    fetch(`/api/supervisor/students/${params.id}`)
+    apiFetch(`/api/supervisor/students/${params.id}`)
       .then(async (r) => {
         if (!r.ok) throw new Error(await r.text());
         return r.json();
