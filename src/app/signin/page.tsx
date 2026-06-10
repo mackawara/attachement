@@ -12,8 +12,11 @@ import {
   Stack,
   Snackbar,
   Alert,
+  TextField,
+  Divider,
 } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import GoogleIcon from "@mui/icons-material/Google";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 function SignInContent() {
@@ -23,6 +26,7 @@ function SignInContent() {
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const error = searchParams.get("error");
   const [snackOpen, setSnackOpen] = useState(() => !!error);
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     if (session) router.push(callbackUrl);
@@ -46,7 +50,8 @@ function SignInContent() {
             Sign in
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Use your approved GitHub account to access the attachment logbook.
+            Use your approved GitHub or Google account to access the attachment
+            logbook.
           </Typography>
           <Stack spacing={2}>
             <Button
@@ -57,7 +62,48 @@ function SignInContent() {
             >
               Continue with GitHub
             </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={<GoogleIcon />}
+              onClick={() => signIn("google", { callbackUrl })}
+            >
+              Continue with Google
+            </Button>
           </Stack>
+
+          <Divider sx={{ my: 3 }}>Supervisors</Divider>
+
+          <Box
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              signIn("supervisor-email", {
+                email,
+                callbackUrl: "/supervisor",
+              });
+            }}
+          >
+            <Stack spacing={2}>
+              <TextField
+                type="email"
+                label="Supervisor email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                fullWidth
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                color="secondary"
+                size="large"
+                disabled={!email.trim()}
+              >
+                Continue with email
+              </Button>
+            </Stack>
+          </Box>
         </Paper>
       </Box>
       <Snackbar
@@ -72,7 +118,7 @@ function SignInContent() {
           variant="filled"
           sx={{ width: "100%" }}
         >
-          {error === "AccessDenied"
+          {error === "AccessDenied" || error === "CredentialsSignin"
             ? "Access denied — your email is not on the approved list. Contact your administrator."
             : "Sign-in failed. Please try again."}
         </Alert>

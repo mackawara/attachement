@@ -12,6 +12,8 @@ import {
   Stack,
   Snackbar,
   Alert,
+  TextField,
+  Divider,
 } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -20,9 +22,11 @@ function HomeContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const error = searchParams.get("error");
   const [snackOpen, setSnackOpen] = useState(
-    () => searchParams.get("error") === "AccessDenied",
+    () => error === "AccessDenied" || error === "CredentialsSignin",
   );
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     if (!session) return;
@@ -78,6 +82,39 @@ function HomeContent() {
               Sign in with Google
             </Button>
           </Stack>
+
+          <Divider sx={{ my: 3 }}>Supervisors</Divider>
+
+          <Box
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              signIn("supervisor-email", {
+                email,
+                callbackUrl: "/supervisor",
+              });
+            }}
+          >
+            <Stack spacing={2}>
+              <TextField
+                type="email"
+                label="Supervisor email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                fullWidth
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                color="secondary"
+                size="large"
+                disabled={!email.trim()}
+              >
+                Sign in with email
+              </Button>
+            </Stack>
+          </Box>
         </Paper>
       </Box>
       <Snackbar
