@@ -1,0 +1,67 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time; never cancel one that is already touching the VM.
+concurrency:
+  group: attachement-production
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn lint
+      - run: yarn build
+        env:
+          # Build only needs to compile; real values live on the VM.
+          MONGODB_URI: mongodb://localhost:27017/ci
+
+  deploy:
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Secrets live on the "production" GitHub Environment so they can be
+    # scoped, audited and protected with required reviewers if wanted.
+    environment: production
+    steps:
+      - name: Deploy over SSH
+        env:
+          SSH_HOST: ${{ secrets.ORACLE_VM_URL }}
+          SSH_USER: ${{ secrets.ORACLE_USERNAME }}
+          SSH_PRIVATE_KEY: ${{ secrets.ORACLE_VM_PRIVATE_KEY }}
+          # Whole production .env as one multiline secret (see docs/DEPLOY.md).
+          APP_ENV: ${{ secrets.APP_ENV }}
+          APP_DIR: ${{ vars.APP_DIR || 'repos/attachement' }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/vm_key"
+          chmod 600 "$HOME/.ssh/vm_key"
+          trap 'rm -f "$HOME/.ssh/vm_key"' EXIT
+          ssh-keyscan -T 10 -H "$SSH_HOST" > "$HOME/.ssh/known_hosts"
+
+          SSH=(ssh -o IdentitiesOnly=yes -i "$HOME/.ssh/vm_key" "$SSH_USER@$SSH_HOST")
+
+          # 1. Push env: written to a temp file then moved, so a failed
+          #    transfer can never leave a half-written .env behind.
+          printf '%s\n' "$APP_ENV" | "${SSH[@]}" \
+            "set -euo pipefail; cd \"\$HOME/$APP_DIR\"; umask 077; cat > .env.new && mv .env.new .env"
+
+          # 2. Run the deploy script from the exact commit being deployed.
+          "${SSH[@]}" "set -euo pipefail; cd \"\$HOME/$APP_DIR\"; git fetch --prune origin main && git reset --hard $SHA && bash scripts/deploy.sh"
