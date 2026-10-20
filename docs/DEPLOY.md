@@ -13,24 +13,24 @@ GitHub → Settings → Environments → **production** (optionally add required
 | `ORACLE_VM_URL` | VM host/IP |
 | `ORACLE_USERNAME` | SSH user |
 | `ORACLE_VM_PRIVATE_KEY` | deploy key (private) |
-| `APP_ENV` | full production `.env` contents (multiline, keys as in `.env.example`) |
+| `MONGODB_URI`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `AUTH_*`, `OPENAI_API_KEY`, `ALLOWED_EMAILS` | one secret per key in `.env.example` |
 
 ## Env var management
 
-- `.env.example` is the contract. Deploy fails if any key in it is missing/empty in `APP_ENV`.
-- The VM `.env` is overwritten on every deploy from `APP_ENV`; never hand-edit it. Change a value by editing the secret and re-running the workflow (Actions → Run workflow).
-- Add a new var: update `.env.example` in the PR, then update `APP_ENV` before merging.
+- `.env.example` is the contract. Deploy fails if any key in it is missing/empty as a secret.
+- The VM `.env` is overwritten on every deploy from the individual secrets; never hand-edit it. Change a value by editing the secret and re-running the workflow (Actions → Run workflow).
+- Add a new var: update `.env.example` in the PR, then update the secret before merging.
 - Production needs `NEXTAUTH_URL` set to the public URL; use `NEXTAUTH_SECRET` from `openssl rand -base64 32`; keep OAuth callback URLs in sync.
 
 ## Pushing secrets from a local file
 
-`MONGODB_URI` and every other var travel inside `APP_ENV`. Put production values in a gitignored `.env.production`, then:
+Each var is its own secret (`MONGODB_URI` included). Put production values in a gitignored `.env.production`, then:
 
 ```bash
 scripts/push-env-secrets.sh .env.production
 ```
 
-(equivalent to `gh secret set APP_ENV --env production < .env.production`). SSH secrets:
+(equivalent to `gh secret set --env production --env-file .env.production`; single-line values only). SSH secrets:
 
 ```bash
 gh secret set ORACLE_VM_URL --env production --body "<host>"

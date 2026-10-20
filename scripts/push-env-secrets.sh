@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Upload a local env file (default: .env.production) as the APP_ENV secret of
-# the "production" GitHub Environment, plus the VM SSH secrets if given.
+# Upload every KEY=value in a local env file (default: .env.production) as an
+# individual secret of the "production" GitHub Environment.
 # Usage: scripts/push-env-secrets.sh [env-file]
 set -euo pipefail
 
@@ -14,5 +14,5 @@ if grep -Eq '^(MONGODB_URI|NEXTAUTH_URL)=.*(localhost|127\.0\.0\.1)' "$FILE"; th
 fi
 
 gh api -X PUT "repos/$REPO/environments/production" --silent   # create env if missing
-gh secret set APP_ENV --env production --repo "$REPO" < "$FILE"
-echo "APP_ENV set from $FILE (includes MONGODB_URI)."
+gh secret set --env production --repo "$REPO" --env-file "$FILE"
+echo "Secrets set from $FILE:"; grep -E '^[A-Z_][A-Z0-9_]*=' "$FILE" | cut -d= -f1
