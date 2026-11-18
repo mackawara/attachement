@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Container,
@@ -52,6 +52,39 @@ export default function NewWeek() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
+  const [defaultsHint, setDefaultsHint] = useState("");
+  const touched = useRef({ weekNumber: false, weekEnding: false });
+
+  // Pre-fill the week number and ending date from the previous week (or the
+  // attachment start date for week 1). Fields stay editable.
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    const d = new Date();
+    const today = [
+      d.getFullYear(),
+      String(d.getMonth() + 1).padStart(2, "0"),
+      String(d.getDate()).padStart(2, "0"),
+    ].join("-");
+    let cancelled = false;
+    fetch(`/api/weeks/next?today=${today}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((next) => {
+        if (cancelled || !next) return;
+        if (!touched.current.weekNumber) setWeekNumber(String(next.weekNumber));
+        if (!touched.current.weekEnding) setWeekEnding(next.weekEnding);
+        setDefaultsHint(
+          next.basis === "previous-week"
+            ? `Continues from Week ${next.weekNumber - 1} (+7 days).`
+            : next.basis === "attachment-start"
+              ? "First Friday of your attachment period."
+              : "Friday of the current week.",
+        );
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [status]);
 
   const updateDay = (day: (typeof DAYS)[number], field: keyof DayEntry, value: string) => {
     setDays((prev) => ({
@@ -154,7 +187,11 @@ export default function NewWeek() {
               type="number"
               fullWidth
               value={weekNumber}
-              onChange={(e) => setWeekNumber(e.target.value)}
+              onChange={(e) => {
+                touched.current.weekNumber = true;
+                setWeekNumber(e.target.value);
+              }}
+              helperText={defaultsHint || " "}
             />
           </Grid>
           <Grid size={{ xs: 6 }}>
@@ -164,7 +201,11 @@ export default function NewWeek() {
               fullWidth
               slotProps={{ inputLabel: { shrink: true } }}
               value={weekEnding}
-              onChange={(e) => setWeekEnding(e.target.value)}
+              onChange={(e) => {
+                touched.current.weekEnding = true;
+                setWeekEnding(e.target.value);
+              }}
+              helperText=" "
             />
           </Grid>
         </Grid>

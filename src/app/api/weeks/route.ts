@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Week from "@/models/Week";
 import Student from "@/models/Student";
+import { nextWeekDefaults, type WeekSummary } from "@/lib/weekDates";
 
 export async function GET() {
   const session = await auth();
@@ -35,6 +36,28 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const week = await Week.create({ ...body, studentId: student._id });
-  return NextResponse.json(week, { status: 201 });
+
+  // Fill in the week number / ending date when the client leaves them out.
+  if (!body.weekNumber || !body.weekEnding) {
+    const existing = await Week.find({ studentId: student._id })
+      .select("weekNumber weekEnding")
+      .lean<WeekSummary[]>();
+    const defaults = nextWeekDefaults(existing, student.attachmentFrom);
+    body.weekNumber ||= defaults.weekNumber;
+    body.weekEnding ||= defaults.weekEnding;
+    body.signatureDate ||= body.weekEnding;
+  }
+
+  try {
+    const week = await Week.create({ ...body, studentId: student._id });
+    return NextResponse.json(week, { status: 201 });
+  } catch (err) {
+    if ((err as { code?: number }).code === 11000) {
+      return NextResponse.json(
+        { error: `Week ${body.weekNumber} already exists.` },
+        { status: 409 },
+      );
+    }
+    throw err;
+  }
 }
